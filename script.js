@@ -1,4 +1,9 @@
+const ARC_CHAIN_ID = "5042002";
+const ARC_RPC = "https://rpc.testnet.arc.network";
+const ARC_NAME = "Arc Testnet";
 
+const generateBtn = document.getElementById("generateBtn");
+const memoBox = document.getElementById("memoBox");
 const generateBtn = document.getElementById("generateBtn");
 const memoBox = document.getElementById("memoBox");
 
