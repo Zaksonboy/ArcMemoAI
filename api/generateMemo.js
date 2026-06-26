@@ -1,15 +1,24 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
+      success: false,
       error: "Method not allowed"
     });
   }
 
   const { recipient, amount, purpose } = req.body;
 
-  if (!recipient || !amount || !purpose) {
+  if (
+    typeof recipient !== "string" ||
+    typeof amount !== "string" ||
+    typeof purpose !== "string" ||
+    !recipient.trim() ||
+    !amount.trim() ||
+    !purpose.trim()
+  ) {
     return res.status(400).json({
-      error: "Missing required fields"
+      success: false,
+      error: "Please complete all fields."
     });
   }
 
@@ -51,20 +60,31 @@ Category:
       }
     );
 
-    const data = await response.json();
+    if (!response.ok) {
+      throw new Error("Gemini request failed.");
+    }
+
+    const result = await response.json();
 
     const memo =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Unable to generate memo.";
+      result.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    res.status(200).json({
+    if (!memo) {
+      throw new Error("No memo returned.");
+    }
+
+    return res.status(200).json({
+      success: true,
       memo
     });
 
   } catch (error) {
 
-    res.status(500).json({
-      error: "Failed to generate memo."
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      error: "Unable to generate memo."
     });
 
   }
