@@ -1,40 +1,47 @@
-
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial,sans-serif;
+font-family:Segoe UI,Arial,sans-serif;
 }
 
 body{
-background:#0b1120;
+background:radial-gradient(circle at top,#0f172a,#020617);
 color:white;
+min-height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-min-height:100vh;
 padding:20px;
 }
 
-.card{
+.container{
 width:100%;
-max-width:420px;
+max-width:450px;
+}
+
+.card{
 background:#111827;
-padding:25px;
+border:1px solid rgba(255,255,255,.08);
 border-radius:20px;
-box-shadow:0 0 20px rgba(0,0,0,.4);
+padding:25px;
+box-shadow:0 15px 40px rgba(0,0,0,.45);
 }
 
 h1{
 text-align:center;
-color:#38bdf8;
-margin-bottom:10px;
+font-size:30px;
+margin-bottom:8px;
+background:linear-gradient(90deg,#38bdf8,#34d399);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
 
 .subtitle{
 text-align:center;
 color:#94a3b8;
 margin-bottom:25px;
+font-size:14px;
 }
 
 button{
@@ -45,29 +52,56 @@ border:none;
 border-radius:12px;
 background:#2563eb;
 color:white;
-font-size:16px;
+font-size:15px;
 font-weight:bold;
 cursor:pointer;
+transition:.2s;
 }
 
 button:hover{
-opacity:.9;
+transform:translateY(-2px);
+opacity:.95;
+}
+
+#sendBtn{
+background:#16a34a;
 }
 
 input,
 textarea{
 width:100%;
 padding:14px;
-margin-top:15px;
+margin-top:8px;
+margin-bottom:16px;
 border-radius:12px;
 border:1px solid #334155;
 background:#0f172a;
 color:white;
+font-size:14px;
+outline:none;
 }
 
 textarea{
 height:120px;
 resize:none;
+}
+
+label{
+display:block;
+margin-bottom:5px;
+font-size:13px;
+color:#cbd5e1;
+}
+
+#walletBox{
+margin-top:18px;
+padding:14px;
+background:#0f172a;
+border-radius:12px;
+text-align:center;
+color:#94a3b8;
+border:1px solid #334155;
+word-break:break-all;
 }
 
 #memoBox{
@@ -76,18 +110,36 @@ padding:15px;
 background:#0f172a;
 border-radius:12px;
 border:1px solid #334155;
-color:#94a3b8;
-min-height:120px;
+min-height:150px;
 white-space:pre-wrap;
+color:#e2e8f0;
 }
 
-#wallet{
-margin-top:15px;
+#status{
+margin-top:18px;
 padding:12px;
-background:#0f172a;
-border-radius:12px;
+border-radius:10px;
 text-align:center;
-color:#94a3b8;
+font-size:14px;
+display:none;
+}
+
+.success{
+display:block;
+background:#052e16;
+color:#86efac;
+}
+
+.error{
+display:block;
+background:#450a0a;
+color:#fca5a5;
+}
+
+.info{
+display:block;
+background:#082f49;
+color:#7dd3fc;
 }
 
 hr{
