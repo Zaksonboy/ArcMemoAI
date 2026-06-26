@@ -1,1 +1,65 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArcMemoAI</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>🤖 ArcMemoAI</h1>
+
+<p class="subtitle">
+Generate AI-powered Arc Transaction Memos and send USDC securely.
+</p>
+
+<button id="connectBtn">
+🔗 Connect Wallet
+</button>
+
+<div id="wallet">
+Not Connected
+</div>
+
+<hr>
+
+<h3>Payment Details</h3>
+
+<input
+type="text"
+id="recipient"
+placeholder="Recipient Wallet Address">
+
+<input
+type="number"
+id="amount"
+placeholder="Amount (USDC)">
+
+<textarea
+id="purpose"
+placeholder="Describe the payment..."></textarea>
+
+<button id="generateBtn">
+ Generate Memo
+</button>
+
+<div id="memoBox">
+Your AI-generated memo will appear here.
+</div>
+
+<button id="sendBtn">
+💸 Send Payment
+</button>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
