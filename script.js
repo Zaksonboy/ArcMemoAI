@@ -5,14 +5,6 @@ const ARC = {
   explorer: "https://testnet.arcscan.app/tx/"
 };
 
-const USDC = {
-  address: "0x3600000000000000000000000000000000000000",
-  decimals: 6,
-  abi: [
-    "function transfer(address to, uint256 amount) returns (bool)"
-  ]
-};
-
 const ui = {
   connect: document.getElementById("connectBtn"),
   wallet: document.getElementById("walletBox"),
@@ -47,7 +39,6 @@ function hideTransaction() {
 
 function showTransaction(hash) {
   if (!ui.txLink) return;
-
   ui.txLink.href = `${ARC.explorer}${hash}`;
   ui.txLink.textContent = "View Transaction";
   ui.txLink.style.display = "inline-block";
@@ -55,14 +46,14 @@ function showTransaction(hash) {
 
 async function switchToArc() {
   try {
-    await ethereum.request({
+    await window.ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: ARC.chainId }]
     });
   } catch (error) {
     if (error.code !== 4902) throw error;
 
-    await ethereum.request({
+    await window.ethereum.request({
       method: "wallet_addEthereumChain",
       params: [{
         chainId: ARC.chainId,
@@ -71,11 +62,9 @@ async function switchToArc() {
         nativeCurrency: {
           name: "USDC",
           symbol: "USDC",
-          decimals: 6
+          decimals: 18  // Arc native token uses 18 decimals
         },
-        blockExplorerUrls: [
-          "https://testnet.arcscan.app"
-        ]
+        blockExplorerUrls: ["https://testnet.arcscan.app"]
       }]
     });
   }
@@ -89,10 +78,7 @@ async function connectWallet() {
   try {
     setStatus("Connecting wallet...", "info");
 
-    await ethereum.request({
-      method: "eth_requestAccounts"
-    });
-
+    await window.ethereum.request({ method: "eth_requestAccounts" });
     await switchToArc();
 
     state.provider = new ethers.BrowserProvider(window.ethereum);
@@ -106,19 +92,16 @@ async function connectWallet() {
 
   } catch (error) {
     console.error(error);
-
     setStatus(
-      error.shortMessage ||
-      error.message ||
-      "Wallet connection failed.",
+      error.shortMessage || error.message || "Wallet connection failed.",
       "error"
     );
   }
 }
 
 ui.connect.addEventListener("click", connectWallet);
-
 hideTransaction();
+
 async function generateMemo() {
   const recipient = ui.recipient.value.trim();
   const amount = ui.amount.value.trim();
@@ -132,33 +115,39 @@ async function generateMemo() {
     ui.generate.disabled = true;
     setStatus("Generating AI memo...", "info");
 
-    const response = await fetch("/api/generateMemo", {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "x-api-key": "YOUR_API_KEY_HERE",       // replace with your key
+        "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        recipient,
-        amount,
-        purpose
+        model: "claude-sonnet-4-6",
+        max_tokens: 256,
+        messages: [{
+          role: "user",
+          content: `Write a short, professional payment memo (2-3 sentences max) for the following:
+Recipient: ${recipient}
+Amount: ${amount} USDC
+Purpose: ${purpose}
+Return only the memo text, no labels or extra formatting.`
+        }]
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "Failed to generate memo.");
+      throw new Error(data.error?.message || "Failed to generate memo.");
     }
 
-    ui.memo.textContent = data.memo;
+    ui.memo.textContent = data.content?.[0]?.text?.trim() || "No memo returned.";
     setStatus("AI memo generated.", "success");
 
   } catch (error) {
     console.error(error);
-    setStatus(
-      error.message || "Failed to generate memo.",
-      "error"
-    );
+    setStatus(error.message || "Failed to generate memo.", "error");
   } finally {
     ui.generate.disabled = false;
   }
@@ -185,19 +174,13 @@ async function sendPayment() {
   try {
     ui.send.disabled = true;
     hideTransaction();
-
     setStatus("Sending USDC...", "info");
 
-    const usdc = new ethers.Contract(
-      USDC.address,
-      USDC.abi,
-      state.signer
-    );
-
-    const tx = await usdc.transfer(
-      recipient,
-      ethers.parseUnits(amount, USDC.decimals)
-    );
+    // USDC is the native token on Arc — send as a native value transfer, not ERC-20
+    const tx = await state.signer.sendTransaction({
+      to: recipient,
+      value: ethers.parseEther(amount)   // 18 decimals, not parseUnits(..., 6)
+    });
 
     setStatus("Waiting for confirmation...", "info");
 
@@ -208,20 +191,14 @@ async function sendPayment() {
     }
 
     showTransaction(tx.hash);
-
     setStatus("Payment sent successfully.", "success");
 
   } catch (error) {
     console.error(error);
-
     setStatus(
-      error.reason ||
-      error.shortMessage ||
-      error.message ||
-      "Transaction failed.",
+      error.reason || error.shortMessage || error.message || "Transaction failed.",
       "error"
     );
-
   } finally {
     ui.send.disabled = false;
   }
