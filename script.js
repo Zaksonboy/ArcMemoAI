@@ -1,119 +1,44 @@
-// ==============================
-// ArcMemoAI
-// script.js
-// Part 1 - Network & Wallet
-// ==============================
+const ARC = {
+  chainId: "0x4CF4B2",
+  rpc: "https://rpc.testnet.arc.network",
+  name: "Arc Testnet",
+  explorer: "https://testnet.arcscan.app/tx/"
+};
 
-// ---------- Arc Network ----------
-const ARC_CHAIN_ID = "0x4CF4B2";
-const ARC_RPC = "https://rpc.testnet.arc.network";
-const ARC_NAME = "Arc Testnet";
+const ui = {
+  connect: document.getElementById("connectBtn"),
+  wallet: document.getElementById("walletBox"),
+  recipient: document.getElementById("recipient"),
+  amount: document.getElementById("amount"),
+  purpose: document.getElementById("purpose"),
+  generate: document.getElementById("generateBtn"),
+  send: document.getElementById("sendBtn"),
+  memo: document.getElementById("memoBox"),
+  status: document.getElementById("status"),
+  txLink: document.getElementById("txLink")
+};
 
-// ---------- Elements ----------
-const connectBtn = document.getElementById("connectBtn");
-const walletBox = document.getElementById("walletBox");
-const generateBtn = document.getElementById("generateBtn");
-const sendBtn = document.getElementById("sendBtn");
+const state = {
+  provider: null,
+  signer: null,
+  account: null
+};
 
-const recipientInput = document.getElementById("recipient");
-const amountInput = document.getElementById("amount");
-const purposeInput = document.getElementById("purpose");
-
-const memoBox = document.getElementById("memoBox");
-const statusBox = document.getElementById("status");
-const txLink = document.getElementById("txLink");
-
-// ---------- Wallet ----------
-let provider = null;
-let signer = null;
-let walletAddress = "";
-
-// ---------- Helpers ----------
-function showStatus(message, type = "info") {
-  statusBox.textContent = message;
-  statusBox.className = "status " + type;
+function setStatus(message, type = "info") {
+  ui.status.textContent = message;
+  ui.status.className = `status ${type}`;
 }
 
-function shortenAddress(address) {
+function shortAddress(address) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-// ---------- Switch Network ----------
-async function switchToArc() {
-  try {
-    await window.ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [
-        {
-          chainId: ARC_CHAIN_ID
-        }
-      ]
-    });
-  } catch (error) {
-
-    if (error.code === 4902) {
-
-      await window.ethereum.request({
-        method: "wallet_addEthereumChain",
-        params: [
-          {
-            chainId: ARC_CHAIN_ID,
-            chainName: ARC_NAME,
-            rpcUrls: [ARC_RPC],
-            nativeCurrency: {
-              name: "USDC",
-              symbol: "USDC",
-              decimals: 6
-            }
-          }
-        ]
-      });
-
-    } else {
-      throw error;
-    }
-
-  }
+function showTransaction(hash) {
+  ui.txLink.href = `${ARC.explorer}${hash}`;
+  ui.txLink.style.display = "block";
+  ui.txLink.textContent = "View Transaction";
 }
 
-// ---------- Connect Wallet ----------
-async function connectWallet() {
-
-  if (!window.ethereum) {
-    showStatus("MetaMask is not installed.", "error");
-    return;
-  }
-
-  try {
-
-    showStatus("Connecting wallet...");
-
-    await window.ethereum.request({
-      method: "eth_requestAccounts"
-    });
-
-    await switchToArc();
-
-    provider = new ethers.BrowserProvider(window.ethereum);
-
-    signer = await provider.getSigner();
-
-    walletAddress = await signer.getAddress();
-
-    walletBox.textContent = shortenAddress(walletAddress);
-
-    connectBtn.textContent = "Wallet Connected";
-
-    showStatus("Connected successfully.", "success");
-
-  } catch (error) {
-
-    console.error(error);
-
-    showStatus("Wallet connection failed.", "error");
-
-  }
-
+function hideTransaction() {
+  ui.txLink.style.display = "none";
 }
-
-connectBtn.addEventListener("click", connectWallet);
