@@ -42,3 +42,36 @@ function showTransaction(hash) {
 function hideTransaction() {
   ui.txLink.style.display = "none";
 }
+const ARC = { ... };
+
+const ui = { ... };
+
+const state = { ... };
+
+function setStatus(...) {
+  ...
+}
+
+function shortAddress(...) {
+  ...
+}
+
+function showTransaction(...) {
+  ...
+}
+
+function hideTransaction() {
+  ...
+}
+
+/* 👇 Paste the wallet module here */
+
+async function switchToArc() {
+  ...
+}
+
+async function connectWallet() {
+  ...
+}
+
+ui.connect.addEventListener("click", connectWallet);
