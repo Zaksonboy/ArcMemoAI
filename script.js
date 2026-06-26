@@ -58,9 +58,9 @@ async function switchToArc() {
   chainName: ARC.name,
   rpcUrls: [ARC.rpc],
   nativeCurrency: {
-    name: "ETH",
-    symbol: "ETH",
-    decimals: 18
+    name: "USDC",
+    symbol: "USDC",
+    decimals: 6
   },
   blockExplorerUrls: [
     "https://testnet.arcscan.app"
