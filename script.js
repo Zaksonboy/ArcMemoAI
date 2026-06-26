@@ -140,3 +140,71 @@ async function generateMemo() {
 }
 
 ui.generate.addEventListener("click", generateMemo);
+const USDC = {
+  address: "0x3600000000000000000000000000000000000000",
+  decimals: 6,
+  abi: [
+    "function transfer(address to, uint256 amount) returns (bool)"
+  ]
+};
+
+async function sendPayment() {
+  if (!state.signer) {
+    setStatus("Please connect your wallet first.", "error");
+    return;
+  }
+
+  const recipient = ui.recipient.value.trim();
+  const amount = ui.amount.value.trim();
+
+  if (!ethers.isAddress(recipient)) {
+    setStatus("Please enter a valid recipient address.", "error");
+    return;
+  }
+
+  if (!amount || Number(amount) <= 0) {
+    setStatus("Please enter a valid amount.", "error");
+    return;
+  }
+
+  try {
+    ui.send.disabled = true;
+    hideTransaction();
+    setStatus("Preparing transaction...", "info");
+
+    const usdc = new ethers.Contract(
+      USDC.address,
+      USDC.abi,
+      state.signer
+    );
+
+    const tx = await usdc.transfer(
+      recipient,
+      ethers.parseUnits(amount, USDC.decimals)
+    );
+
+    setStatus("Waiting for transaction confirmation...", "info");
+
+    await tx.wait();
+
+    showTransaction(tx.hash);
+
+    setStatus("USDC payment sent successfully.", "success");
+
+  } catch (error) {
+    console.error(error);
+
+    const message =
+      error.reason ||
+      error.shortMessage ||
+      error.message ||
+      "Transaction failed.";
+
+    setStatus(message, "error");
+
+  } finally {
+    ui.send.disabled = false;
+  }
+}
+
+ui.send.addEventListener("click", sendPayment);
