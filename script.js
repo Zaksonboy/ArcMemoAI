@@ -53,11 +53,19 @@ async function switchToArc() {
     if (error.code === 4902) {
       await window.ethereum.request({
         method: "wallet_addEthereumChain",
-        params: [{
-          chainId: ARC.chainId,
-          chainName: ARC.name,
-          rpcUrls: [ARC.rpc]
-        }]
+      params: [{
+  chainId: ARC.chainId,
+  chainName: ARC.name,
+  rpcUrls: [ARC.rpc],
+  nativeCurrency: {
+    name: "ETH",
+    symbol: "ETH",
+    decimals: 18
+  },
+  blockExplorerUrls: [
+    "https://testnet.arcscan.app"
+  ]
+}]
       });
     } else {
       throw error;
