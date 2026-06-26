@@ -1,5 +1,5 @@
 const ARC = {
-  chainId: "5042002",
+  chainId: "0x4CF4B2",
   rpc: "https://rpc.testnet.arc.network",
   name: "Arc Testnet",
   explorer: "https://testnet.arcscan.app/tx/"
