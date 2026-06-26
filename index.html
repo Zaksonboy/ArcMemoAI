@@ -1,69 +1,84 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ArcMemoAI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="style.css">
+<title>ArcMemoAI</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js"></script>
+
 </head>
 
 <body>
+
+<div class="container">
 
 <div class="card">
 
 <h1>🤖 ArcMemoAI</h1>
 
 <p class="subtitle">
-Generate AI-powered Arc Transaction Memos and send USDC securely.
+AI-powered Arc Transaction Memo Generator
 </p>
 
 <button id="connectBtn">
 🔗 Connect Wallet
 </button>
 
-<div id="wallet">
-Not Connected
+<div id="walletBox">
+Wallet not connected
 </div>
 
 <hr>
 
-<h3>Payment Details</h3>
+<h2>Create Payment</h2>
+
+<label>Recipient Address</label>
 
 <input
 type="text"
 id="recipient"
-placeholder="Recipient Wallet Address">
+placeholder="0x..."
+>
+
+<label>Amount (USDC)</label>
 
 <input
 type="number"
 id="amount"
-placeholder="Amount (USDC)">
+placeholder="10"
+step="0.01"
+>
+
+<label>Purpose</label>
 
 <textarea
 id="purpose"
-placeholder="Describe the payment..."></textarea>
+placeholder="Example: Website design payment"
+></textarea>
 
 <button id="generateBtn">
- Generate Memo
+ Generate AI Memo
 </button>
 
 <div id="memoBox">
-Your AI-generated memo will appear here.
+Your generated memo will appear here...
 </div>
 
 <button id="sendBtn">
 💸 Send Payment
 </button>
 
+<div id="status"></div>
+
+</div>
+
 </div>
 
 <script src="script.js"></script>
 
-</body>
-</html>
-<script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js"></script>
-<script src="script.js"></script>
 </body>
 </html>
