@@ -92,9 +92,11 @@ async function generateMemo() {
 }
 
 // ── Send Payment ──
-async function sendPayment() {
-  if (!signer) {
-    return showStatus('Connect your wallet first.', 'err');
+async function connectWallet() {
+  alert('Button clicked. ethereum: ' + (typeof window.ethereum));
+  
+  if (!window.ethereum) {
+    return showStatus('MetaMask not detected. Please install it.', 'err');
   }
 
   const to = document.getElementById('toAddr').value.trim();
