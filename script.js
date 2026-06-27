@@ -7,84 +7,77 @@ const STORAGE_KEY = 'momoAI_history';
 
 let provider, signer, walletAddress;
 
-// ── Wait for page to fully load ──
+// ── Init on load ──
 window.addEventListener('load', function () {
   renderHistory();
-  checkIfAlreadyConnected();
 
-  if (window.ethereum) {
-    window.ethereum.on('accountsChanged', function (accounts) {
-      if (accounts.length === 0) {
-        resetWallet();
-      } else {
-        location.reload();
+  // If wallet already connected, restore session
+  setTimeout(async function () {
+    if (typeof window.ethereum === 'undefined') return;
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts && accounts.length > 0) {
+        await setupWallet(accounts[0]);
       }
-    });
-    window.ethereum.on('chainChanged', function () {
-      location.reload();
-    });
-  }
+    } catch (e) {
+      console.log('Auto-connect skipped');
+    }
+  }, 500);
 });
 
-// ── Check if wallet already connected ──
-async function checkIfAlreadyConnected() {
-  if (!window.ethereum) return;
-  try {
-    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-    if (accounts && accounts.length > 0) {
-      walletAddress = accounts[0];
-      provider = new ethers.BrowserProvider(window.ethereum);
-      signer = await provider.getSigner();
-      updateWalletButton(walletAddress);
-    }
-  } catch (e) {
-    console.log('Not connected yet');
-  }
+// ── Setup wallet after getting account ──
+async function setupWallet(account) {
+  walletAddress = account;
+  provider = new ethers.BrowserProvider(window.ethereum);
+  signer = await provider.getSigner();
+
+  const btn = document.getElementById('walletBtn');
+  btn.textContent = account.slice(0, 6) + '…' + account.slice(-4);
+  btn.classList.add('connected');
 }
 
 // ── Connect Wallet ──
 async function connectWallet() {
   if (typeof window.ethereum === 'undefined') {
-    showStatus('No wallet found. Open this site inside MetaMask or Rabby browser.', 'err');
+    showStatus('No wallet detected. Open inside Rabby or MetaMask browser.', 'err');
     return;
   }
 
   try {
     showStatus('Connecting…', 'info');
 
+    // Request accounts
     const accounts = await window.ethereum.request({
-      method: 'eth_requestAccounts'
+      method: 'eth_requestAccounts',
     });
 
     if (!accounts || accounts.length === 0) {
-      showStatus('No accounts found. Unlock your wallet and try again.', 'err');
+      showStatus('No accounts found. Unlock your wallet.', 'err');
       return;
     }
 
-    walletAddress = accounts[0];
-    provider = new ethers.BrowserProvider(window.ethereum);
-    signer = await provider.getSigner();
+    // Setup provider + signer
+    await setupWallet(accounts[0]);
 
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-const currentChain = parseInt(chainId, 16);
+    // Check chain
+    const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
+    const chainIdNum = parseInt(chainIdHex, 16);
 
-if (currentChain !== ARC_CHAIN_ID) {
-  showStatus('Switching to Arc Testnet…', 'info');
-  await switchToArc();
-  // Re-init provider after chain switch
-  provider = new ethers.BrowserProvider(window.ethereum);
-  signer = await provider.getSigner();
-}
+    if (chainIdNum !== ARC_CHAIN_ID) {
+      showStatus('Switching to Arc Testnet…', 'info');
+      await switchToArc();
+      // Re-init after switch
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
     }
 
-    updateWalletButton(walletAddress);
-    showStatus('Wallet connected ✓', 'ok');
+    showStatus('Connected to Arc Testnet ✓', 'ok');
 
   } catch (e) {
     if (e.code === 4001) {
-      showStatus('Connection rejected. Please approve in your wallet.', 'err');
+      showStatus('Rejected. Please approve in your wallet.', 'err');
     } else {
-      showStatus('Error: ' + (e.message || 'Unknown error'), 'err');
+      showStatus('Error: ' + (e.message || 'Unknown'), 'err');
     }
   }
 }
@@ -96,8 +89,8 @@ async function switchToArc() {
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: ARC_CHAIN_HEX }],
     });
-  } catch (switchErr) {
-    if (switchErr.code === 4902) {
+  } catch (e) {
+    if (e.code === 4902) {
       await window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
@@ -107,33 +100,15 @@ async function switchToArc() {
           nativeCurrency: {
             name: 'USD Coin',
             symbol: 'USDC',
-            decimals: 18,
+            decimals: 6,
           },
           blockExplorerUrls: [ARC_EXPLORER],
         }],
       });
     } else {
-      throw switchErr;
+      throw e;
     }
   }
-}
-
-// ── Update wallet button ──
-function updateWalletButton(address) {
-  const btn = document.getElementById('walletBtn');
-  btn.textContent = address.slice(0, 6) + '…' + address.slice(-4);
-  btn.classList.add('connected');
-}
-
-// ── Reset wallet state ──
-function resetWallet() {
-  walletAddress = null;
-  signer = null;
-  provider = null;
-  const btn = document.getElementById('walletBtn');
-  btn.textContent = 'Connect Wallet';
-  btn.classList.remove('connected');
-  showStatus('Wallet disconnected.', 'info');
 }
 
 // ── Generate AI Memo ──
@@ -143,7 +118,7 @@ async function generateMemo() {
   const description = document.getElementById('description').value.trim();
 
   if (!description) {
-    showStatus('Please enter a description first.', 'err');
+    showStatus('Enter a description first.', 'err');
     return;
   }
 
@@ -159,13 +134,20 @@ async function generateMemo() {
       body: JSON.stringify({ address, amount, description }),
     });
 
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error('Server error: ' + text);
+    }
+
     const data = await res.json();
 
     if (data.memo) {
       document.getElementById('memo').value = data.memo;
+      showStatus('Memo generated ✓', 'ok');
     } else {
-      showStatus(data.error || 'Could not generate memo. Write one manually.', 'err');
+      showStatus(data.error || 'No memo returned. Write one manually.', 'err');
     }
+
   } catch (e) {
     showStatus('AI error: ' + (e.message || e), 'err');
   } finally {
@@ -185,6 +167,7 @@ async function sendPayment() {
   const amountStr = document.getElementById('amount').value.trim();
   const memo = document.getElementById('memo').value.trim();
 
+  // Validate
   if (!ethers.isAddress(to)) {
     showStatus('Invalid recipient address.', 'err');
     return;
@@ -194,10 +177,12 @@ async function sendPayment() {
     return;
   }
   if (!memo) {
-  showStatus('Generate a memo first — click ✦ Generate above.', 'err');
-  // Auto scroll to memo
-  document.getElementById('memo').scrollIntoView({ behavior: 'smooth' });
-  return;
+    showStatus('Please generate a memo first.', 'err');
+    document.getElementById('generateBtn').style.boxShadow = '0 0 0 3px rgba(255,95,126,0.4)';
+    setTimeout(() => {
+      document.getElementById('generateBtn').style.boxShadow = '';
+    }, 2000);
+    return;
   }
 
   const sendBtn = document.getElementById('sendBtn');
@@ -206,28 +191,40 @@ async function sendPayment() {
   showStatus('Confirm in your wallet…', 'info');
 
   try {
+    // USDC = 6 decimals on Arc
     const value = ethers.parseUnits(amountStr, 6);
-    // Encode memo as UTF-8 hex for on-chain storage
-const memoBytes = ethers.toUtf8Bytes(memo);
-const memoHex = ethers.hexlify(memoBytes);
 
-const tx = await signer.sendTransaction({
-  to,
-  value,
-  data: memoHex,
-  gasLimit: 100000n,
-});
+    // Encode memo as hex → stored in tx.data on-chain
+    const memoHex = ethers.hexlify(ethers.toUtf8Bytes(memo));
+
+    const tx = await signer.sendTransaction({
+      to,
+      value,
+      data: memoHex,
+      gasLimit: 100000n,
+    });
 
     showStatus('Submitted. Waiting for confirmation…', 'info');
-    await tx.wait();
+    const receipt = await tx.wait();
 
     showStatus(
       `Confirmed! <a class="tx-link" href="${ARC_EXPLORER}/tx/${tx.hash}" target="_blank">${tx.hash.slice(0, 16)}…</a>`,
       'ok'
     );
 
-    saveHistory({ to, amount: amountStr, memo, hash: tx.hash, time: Date.now() });
-    clearForm();
+    saveHistory({
+      to,
+      amount: amountStr,
+      memo,
+      hash: tx.hash,
+      time: Date.now(),
+    });
+
+    // Clear form
+    document.getElementById('toAddr').value = '';
+    document.getElementById('amount').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('memo').value = '';
 
   } catch (e) {
     if (e.code === 4001) {
@@ -239,14 +236,6 @@ const tx = await signer.sendTransaction({
     sendBtn.disabled = false;
     sendBtn.textContent = 'Send Payment';
   }
-}
-
-// ── Clear form ──
-function clearForm() {
-  document.getElementById('toAddr').value = '';
-  document.getElementById('amount').value = '';
-  document.getElementById('description').value = '';
-  document.getElementById('memo').value = '';
 }
 
 // ── History ──
@@ -307,4 +296,25 @@ function showStatus(msg, type = 'info') {
   if (type === 'ok') {
     setTimeout(() => el.classList.remove('show'), 8000);
   }
+}
+
+// ── Wallet event listeners ──
+if (typeof window.ethereum !== 'undefined') {
+  window.ethereum.on('accountsChanged', function (accounts) {
+    if (accounts.length === 0) {
+      walletAddress = null;
+      signer = null;
+      provider = null;
+      const btn = document.getElementById('walletBtn');
+      btn.textContent = 'Connect Wallet';
+      btn.classList.remove('connected');
+      showStatus('Wallet disconnected.', 'info');
+    } else {
+      location.reload();
+    }
+  });
+
+  window.ethereum.on('chainChanged', function () {
+    location.reload();
+  });
 }
