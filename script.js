@@ -1,5 +1,8 @@
+const ARC_CHAIN_ID = 5042002;
+const ARC_CHAIN_HEX = "0x4CF4B2";
+const ARC_RPC = "https://rpc.testnet.arc.network";
+const ARC_EXPLORER = "https://testnet.arcscan.app";
 const STORAGE_KEY = 'momoAI_history';
-
 let provider, signer, walletAddress;
 
 // ── Init on load ──
