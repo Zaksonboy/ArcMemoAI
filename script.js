@@ -2,6 +2,16 @@ const ARC_CHAIN_ID = 5042002;
 const ARC_CHAIN_HEX = "0x4CF4B2";
 const ARC_RPC = "https://rpc.testnet.arc.network";
 const ARC_EXPLORER = "https://testnet.arcscan.app";
+const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
+const MEMO_CONTRACT = "0x5294E9927c3306DcBaDb03fe70b92e01cCede505";
+
+const USDC_ABI = [
+  "function transfer(address,uint256) returns (bool)"
+];
+
+const MEMO_ABI = [
+  "function memo(address target, bytes data, bytes32 memoId, bytes memoData) external payable returns (bytes)"
+];
 const STORAGE_KEY = 'momoAI_history';
 let provider, signer, walletAddress;
 
