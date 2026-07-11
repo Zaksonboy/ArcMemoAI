@@ -1,237 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>momoAI — AI Powered USDC Payments</title>
-
-<link rel="stylesheet" href="style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>momoAI — USDC Payment Assistant</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="landing.css" />
 </head>
-
-<body>
-
-<!-- =========================
-     LANDING PAGE
-========================== -->
-
-<section id="landingPage">
-
-<div class="landing-container">
-
-<img src="images/arc-logo.png"
-class="landing-logo"
-alt="Arc">
-
-<div class="hero-badge">
-Built on Arc Testnet
-</div>
-
-<h1 class="hero-title">
-Payments that explain themselves.
-</h1>
-
-<p class="hero-description">
-
-momoAI is an AI-powered payment assistant that generates professional payment memos and permanently records them on-chain using Arc's Memo Contract.
-
-</p>
-
-<div class="hero-grid">
-
-<div class="hero-card">
-
-<h3>🤖 AI Memo</h3>
-
-<p>
-Describe your payment in plain English.
-Gemini writes a professional memo automatically.
-</p>
-
-</div>
-
-<div class="hero-card">
-
-<h3>💙 Native USDC</h3>
-
-<p>
-
-Send native USDC directly on Arc Testnet with seamless wallet integration.
-
-</p>
-
-</div>
-
-<div class="hero-card">
-
-<h3>📝 On-chain Records</h3>
-
-<p>
-
-Every memo becomes a permanent blockchain record through Arc Memo Contract.
-
-</p>
-
-</div>
-
-<div class="hero-card">
-
-<h3>⚡ Built for Arc</h3>
-
-<p>
-
-A showcase of Arc programmable payments and transaction memos.
-
-</p>
-
-</div>
-
-</div>
-
-<div class="flow-box">
-
-<div>Describe Payment</div>
-
-↓
-
-<div>Gemini AI</div>
-
-↓
-
-<div>Professional Memo</div>
-
-↓
-
-<div>Arc Memo Contract</div>
-
-↓
-
-<div>USDC Transfer</div>
-
-</div>
-
-<button class="enter-btn" onclick="openApp()">
-
-Enter App →
-
-</button>
-
-</div>
-
-</section>
-
-<!-- =========================
-      APP PAGE
-========================== -->
-
-<div id="appPage" style="display:none;">
-
-<header>
-
-<img src="images/arc-logo.png"
-class="logo-mark"
-alt="Arc">
-
-<div class="logo-text">
-
-<span class="logo-name">
-
-momoAI
-
-<span class="net-badge">
-
-<span class="net-dot"></span>
-
-Arc Testnet
-
-</span>
-
-</span>
-
-<span class="logo-sub">
-
-AI Payment Assistant
-
-</span>
-
-</div>
-
-<button
-
-class="wallet-pill"
-
-id="walletBtn"
-
-onclick="connectWallet()">
-
-Connect Wallet
-
-</button>
-
+<body class="landing-body">
+
+<header class="landing-header">
+  <img src="images/arc-logo.png" class="logo-mark" alt="Arc">
+  <div class="logo-text">
+    <span class="logo-name">momoAI</span>
+    <span class="logo-sub">USDC Payment Assistant</span>
+  </div>
+  <a href="app.html" class="landing-nav-btn">Enter App</a>
 </header>
 
-<div id="status"></div>
-
-<!-- Payment Form -->
-<div class="card">
-  <div class="card-label">New Payment</div>
-
-  <div class="field">
-    <label>Recipient Address</label>
-    <input type="text" id="toAddr" class="mono" placeholder="0x..." autocomplete="off" />
+<section class="landing-hero">
+  <div class="landing-badge">
+    <span class="net-dot"></span> AI-Powered Payments on Arc
   </div>
 
-  <div class="field">
-    <label>Amount</label>
-    <div class="amount-row">
-      <input type="number" id="amount" placeholder="0.00" min="0" step="any" />
-      <div class="currency-badge">USDC</div>
+  <h1 class="landing-title">
+    Send USDC With<br />
+    <span class="accent-text">A Memo That Explains Itself.</span>
+  </h1>
+
+  <p class="landing-sub">
+    Describe a payment in plain words. momoAI writes a clear, professional memo,
+    then records it permanently on-chain through Arc's Memo Contract —
+    no off-chain database, no lost context.
+  </p>
+
+  <div class="landing-cta-row">
+    <a href="app.html" class="landing-btn-primary">
+      <span class="spark">✦</span> Enter App
+    </a>
+    <a href="https://github.com/Zaksonboy/MEMOAI-ON-ARC" target="_blank" class="landing-btn-secondary">
+      View on GitHub
+    </a>
+  </div>
+
+  <div class="landing-stats">
+    <div class="stat">
+      <div class="stat-value">AI-Written</div>
+      <div class="stat-label">MEMOS</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">On-Chain</div>
+      <div class="stat-label">MEMO RECORDS</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">Arc Testnet</div>
+      <div class="stat-label">NETWORK</div>
     </div>
   </div>
+</section>
 
-  <div class="field">
-    <label>Description <span class="hint">what is this payment for?</span></label>
-    <input type="text" id="description" placeholder="e.g. Website design payment" />
-  </div>
+<section class="landing-tagline">
+  Not Just Payments. Provable Context.
+</section>
 
-  <div class="field">
-    <label>AI Memo <span class="ai-tag">✦ AI-generated</span></label>
-    <div class="memo-box">
-      <textarea id="memo" placeholder="Fill in the fields above, then click Generate…"></textarea>
-      <button class="memo-generate-btn" id="generateBtn" onclick="generateMemo()">
-        <span class="spark">✦</span> Generate
-      </button>
-    </div>
-    <div class="ai-thinking" id="aiThinking">
-      <div class="dot-pulse"><span></span><span></span><span></span></div>
-      momoAI is writing your memo…
-    </div>
-  </div>
-
-  <button class="send-btn" id="sendBtn" onclick="sendPayment()">Send Payment</button>
-</div>
-
-<!-- History -->
-<div class="card history-card">
-  <div class="history-header">
-    <div class="card-label" style="margin-bottom:0">Payment History</div>
-    <button class="clear-btn" onclick="clearHistory()">Clear all</button>
-  </div>
-  <div class="history-list" id="historyList">
-    <div class="history-empty">No payments yet. Send your first one above.</div>
-  </div>
-</div>
-
-<script>
-  const ARC_CHAIN_ID = 5042002;
-  const ARC_CHAIN_HEX = '0x4CF4B2';
-  const ARC_RPC = 'https://rpc.testnet.arc.network';
-  const ARC_EXPLORER = 'https://testnet.arcscan.app';
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.1/ethers.umd.min.js"></script>
-<script src="script.js"></script>
 </body>
 </html>
