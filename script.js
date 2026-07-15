@@ -127,9 +127,9 @@ async function switchToArc() {
           chainName: 'Arc Testnet',
           rpcUrls: [ARC_RPC],
           nativeCurrency: {
-            name: 'USD Coin',
+            name: 'USDC',
             symbol: 'USDC',
-            decimals: 6,
+            decimals: 18,
           },
           blockExplorerUrls: [ARC_EXPLORER],
         }],
