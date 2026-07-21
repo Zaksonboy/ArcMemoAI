@@ -428,3 +428,99 @@ if (typeof window.ethereum !== 'undefined') {
     location.reload();
   });
     }
+async function createRecurring() {
+  const to = document.getElementById('recurTo').value.trim();
+  const amount = document.getElementById('recurAmount').value.trim();
+  const description = document.getElementById('recurDescription').value.trim();
+  const intervalDays = document.getElementById('recurInterval').value.trim();
+
+  if (!ethers.isAddress(to)) {
+    showStatus('Invalid recipient address.', 'err');
+    return;
+  }
+  if (!amount || parseFloat(amount) <= 0) {
+    showStatus('Enter a valid amount.', 'err');
+    return;
+  }
+  if (!description) {
+    showStatus('Enter a description.', 'err');
+    return;
+  }
+  if (!intervalDays || parseInt(intervalDays) < 1) {
+    showStatus('Enter a valid interval in days.', 'err');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/recurring-create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, amount, description, intervalDays }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showStatus('Recurring payment created ✓', 'ok');
+      document.getElementById('recurTo').value = '';
+      document.getElementById('recurAmount').value = '';
+      document.getElementById('recurDescription').value = '';
+      document.getElementById('recurInterval').value = '';
+      loadRecurringOrders();
+    } else {
+      showStatus(data.error || 'Failed to create recurring payment.', 'err');
+    }
+  } catch (e) {
+    showStatus('Error: ' + (e.message || e), 'err');
+  }
+}
+
+async function loadRecurringOrders() {
+  const list = document.getElementById('recurringList');
+  if (!list) return;
+
+  try {
+    const res = await fetch('/api/recurring-create');
+    const data = await res.json();
+    const orders = data.orders || [];
+
+    if (!orders.length) {
+      list.innerHTML = '<div class="history-empty">No recurring payments set up.</div>';
+      return;
+    }
+
+    list.innerHTML = orders.map(o => `
+      <div class="tx-item">
+        <div class="tx-row">
+          <span class="tx-addr">${o.to.slice(0, 8)}…${o.to.slice(-6)}</span>
+          <span class="tx-amount">${o.amount} USDC / ${o.intervalDays}d</span>
+        </div>
+        <div class="tx-memo">${o.description}</div>
+        <div class="tx-meta">
+          <span class="tx-time">Next: ${new Date(o.nextRunAt).toLocaleString()}</span>
+          <button onclick="cancelRecurring('${o.id}')" style="color:#ff5f7e;background:none;border:none;cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="history-empty">Failed to load recurring payments.</div>';
+  }
+}
+
+async function cancelRecurring(id) {
+  if (!confirm('Cancel this recurring payment?')) return;
+  try {
+    await fetch('/api/recurring-cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    loadRecurringOrders();
+  } catch (e) {
+    showStatus('Failed to cancel.', 'err');
+  }
+}
+
+// Load recurring orders on page load
+window.addEventListener('load', function () {
+  setTimeout(loadRecurringOrders, 600);
+});
