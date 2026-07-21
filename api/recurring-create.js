@@ -6,6 +6,17 @@ const redis = new Redis({
 });
 
 export default async function handler(req, res) {
+  if (req.method === 'GET') {
+    const ids = await redis.smembers('recurring:index');
+    const orders = [];
+    for (const id of ids) {
+      const raw = await redis.get(`recurring:${id}`);
+      if (raw) orders.push(typeof raw === 'string' ? JSON.parse(raw) : raw);
+    }
+    orders.sort((a, b) => b.createdAt - a.createdAt);
+    return res.status(200).json({ orders });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
