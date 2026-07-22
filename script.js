@@ -520,7 +520,6 @@ await fetch('/api/recurring-cancel', {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, walletAddress }),
     });
-    });
     loadRecurringOrders();
   } catch (e) {
     showStatus('Failed to cancel.', 'err');
