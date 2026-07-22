@@ -514,10 +514,11 @@ async function loadRecurringOrders() {
 async function cancelRecurring(id) {
   if (!confirm('Cancel this recurring payment?')) return;
   try {
-    await fetch('/api/recurring-cancel', {
+await fetch('/api/recurring-cancel', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id, walletAddress }),
+    });
     });
     loadRecurringOrders();
   } catch (e) {
