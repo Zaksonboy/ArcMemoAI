@@ -1,16 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
-  --bg: #0a0a0f;
-  --surface: #12121a;
-  --card: #1a1a26;
-  --border: #2a2a3d;
-  --accent: #7c6cfa;
-  --accent-glow: rgba(124,108,250,0.18);
-  --accent2: #3de6c8;
-  --text: #e8e8f0;
-  --muted: #6b6b88;
-  --danger: #ff5f7e;
+  --bg: #1b140f;
+  --surface: #241b14;
+  --card: #2c2119;
+  --border: #443327;
+  --accent: #d4a24c;
+  --accent-glow: rgba(212,162,76,0.18);
+  --accent2: #e8c07d;
+  --text: #f3e9dc;
+  --muted: #a8917a;
+  --danger: #ff7a5c;
   --radius: 14px;
   --mono: 'Space Mono', monospace;
   --sans: 'Space Grotesk', sans-serif;
