@@ -7,11 +7,18 @@ const redis = new Redis({
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
+    const { address } = req.query;
+    if (!address) return res.status(400).json({ error: 'Missing address' });
+
     const ids = await redis.smembers('recurring:index');
     const orders = [];
     for (const id of ids) {
       const raw = await redis.get(`recurring:${id}`);
-      if (raw) orders.push(typeof raw === 'string' ? JSON.parse(raw) : raw);
+      if (!raw) continue;
+      const order = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (order.walletAddress?.toLowerCase() === address.toLowerCase()) {
+        orders.push(order);
+      }
     }
     orders.sort((a, b) => b.createdAt - a.createdAt);
     return res.status(200).json({ orders });
@@ -21,9 +28,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { to, amount, description, intervalDays } = req.body;
+  const { to, amount, description, intervalDays, walletAddress } = req.body;
 
-  if (!to || !amount || !description || !intervalDays) {
+  if (!to || !amount || !description || !intervalDays || !walletAddress) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -39,6 +46,7 @@ export default async function handler(req, res) {
     nextRunAt,
     active: true,
     createdAt: Date.now(),
+    walletAddress: walletAddress.toLowerCase(),
   };
 
   await redis.set(`recurring:${id}`, JSON.stringify(order));
