@@ -483,7 +483,8 @@ async function loadRecurringOrders() {
   if (!list) return;
 
   try {
-    const res = await fetch('/api/recurring-create');
+    if (!walletAddress) return;
+    const res = await fetch('/api/recurring-create?address=' + walletAddress);
     const data = await res.json();
     const orders = data.orders || [];
 
